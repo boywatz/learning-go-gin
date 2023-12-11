@@ -6,6 +6,7 @@ import (
 	"github/learning/go-gin/service"
 	"io"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +44,14 @@ func main() {
 	})
 
 	server.POST("/videos", func(ctx *gin.Context) {
-		ctx.JSON(201, videoController.Save(ctx))
+		video, err := videoController.Save(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		ctx.JSON(201, video)
 	})
 
 	server.Run(":8080")
