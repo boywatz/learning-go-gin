@@ -2,9 +2,14 @@ package main
 
 import (
 	"github/learning/go-gin/controller"
+	middleware "github/learning/go-gin/middlewares"
 	"github/learning/go-gin/service"
+	"io"
+	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	gindump "github.com/tpkeeper/gin-dump"
 )
 
 var (
@@ -12,8 +17,20 @@ var (
 	videoController controller.VideoController = controller.New(videoService)
 )
 
+func setupLogOutput() {
+	file, err := os.Create("server.log")
+	if err != nil {
+		log.Printf("Error creating file: %v", err)
+	}
+	gin.DefaultWriter = io.MultiWriter(file, os.Stdout)
+}
+
 func main() {
-	server := gin.Default()
+	setupLogOutput()
+
+	server := gin.New()
+
+	server.Use(gin.Recovery(), middleware.Logger(), middleware.BasicAuth(), gindump.Dump())
 
 	server.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
