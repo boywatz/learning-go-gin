@@ -39,20 +39,23 @@ func main() {
 		})
 	})
 
-	server.GET("/videos", func(ctx *gin.Context) {
-		ctx.JSON(200, videoController.FindAll())
-	})
+	apiRoutes := server.Group("/api")
+	{
+		apiRoutes.GET("/videos", func(ctx *gin.Context) {
+			ctx.JSON(200, videoController.FindAll())
+		})
 
-	server.POST("/videos", func(ctx *gin.Context) {
-		video, err := videoController.Save(ctx)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		ctx.JSON(201, video)
-	})
+		apiRoutes.POST("/videos", func(ctx *gin.Context) {
+			video, err := videoController.Save(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+			ctx.JSON(201, video)
+		})
+	}
 
 	server.Run(":8080")
 }
